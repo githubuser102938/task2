@@ -1,21 +1,45 @@
-// Get DOM elements
-const taskInput = document.getElementById('task-input');
-const addButton = document.getElementById('add-button');
-const taskList = document.getElementById('task-list');
+window.addEventListener('DOMContentLoaded', () => {
+  const taskList = document.getElementById('task-list');
+  const taskInput = document.getElementById('task-input');
+  const addButton = document.getElementById('add-button');
 
-// Add task
-addButton.addEventListener('click', function() {
-  const taskText = taskInput.value;
-  if (taskText.trim() !== '') {
-    const taskItem = document.createElement('li');
-    taskItem.innerHTML = `<span>${taskText}</span> <button class="delete-button">Delete</button>`;
-    taskList.appendChild(taskItem);
-    taskInput.value = '';
+  // Load tasks from localStorage
+  const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
-    // Add delete event listener
-    const deleteButton = taskItem.querySelector('.delete-button');
-    deleteButton.addEventListener('click', function() {
-      taskItem.remove();
+  // Render saved tasks
+  savedTasks.forEach(task => {
+    createTaskElement(task);
+  });
+
+  // Add task to the list and save to localStorage
+  addButton.addEventListener('click', () => {
+    const task = taskInput.value.trim();
+    if (task) {
+      createTaskElement(task);
+      savedTasks.push(task);
+      localStorage.setItem('tasks', JSON.stringify(savedTasks));
+      taskInput.value = '';
+    }
+  });
+
+  function createTaskElement(task) {
+    const li = document.createElement('li');
+    li.textContent = task;
+    
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete';
+    deleteButton.classList.add('delete-button');
+    
+    deleteButton.addEventListener('click', () => {
+      li.remove();
+      const index = savedTasks.indexOf(task);
+      if (index > -1) {
+        savedTasks.splice(index, 1);
+        localStorage.setItem('tasks', JSON.stringify(savedTasks));
+      }
     });
+    
+    li.appendChild(deleteButton);
+    taskList.appendChild(li);
   }
 });
